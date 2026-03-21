@@ -1,34 +1,29 @@
 import express from 'express';
+import 'dotenv/config';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import logger from './middleware/logger.js';
-import notFoundHandler from './middleware/notFoundHandler.js';
-import errorHandler from './middleware/errorHandler.js';
-import notesRoutes from './routes/notesRoutes.js';
+
 import { connectMongoDB } from './db/connectMongoDB.js';
 
-dotenv.config();
+import { logger } from './middleware/logger.js';
+import { notFoundHandler } from './middleware/notFoundHandler.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import notesRouter from './routes/notesRoutes.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ?? 3000;
 
-// Підключення до MongoDB
-await connectMongoDB();
+app.use(logger);
+app.use(express.json({ limit: '5mb' }));
+app.use(cors({ methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'] }));
 
-// Middleware 
-app.use(cors());  
-app.use(express.json()); 
+app.use(notesRouter);
 
-// Роут нотаток
-app.use('/notes', notesRoutes);
-
-// Middleware для 404
 app.use(notFoundHandler);
 
-// Глобальний обробник помилок
 app.use(errorHandler);
 
-// Запуск сервера
+await connectMongoDB();
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
