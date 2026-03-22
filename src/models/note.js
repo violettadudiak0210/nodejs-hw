@@ -18,6 +18,11 @@ const noteSchema = new Schema(
       enum: TAGS,
       default: 'Todo',
     },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User', // посилання на модель User
+      required: true,
+    },
   },
   {
     timestamps: true,
